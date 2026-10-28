@@ -147,11 +147,20 @@ window.DEF = window.DEF || {};
         token(cx + t * spread, baseY - peak * (1 - t * t));
       }
     }
+    // Arc that follows the ground: each coin sits 30px above the surface under
+    // it, plus the arc height. Use this over ground; tokenArc is for pits.
+    function tokenArcOn(cx, n, spread, peak) {
+      for (var i = 0; i < n; i++) {
+        var t = n === 1 ? 0 : (i / (n - 1)) * 2 - 1;
+        var tx = cx + t * spread;
+        token(tx, topAt(tx) - 30 - peak * (1 - t * t));
+      }
+    }
     function battery(bx, h) { L.batteries.push({ x: bx, y: topAt(bx) - (h || 34) }); }
 
     tokenRow(250, 400, 4, 32);                                   // tutorial row
-    tokenArc(marks.curb1.x + 10, 3, 55, marks.curb1.y + 20, 70); // over curb 1
-    tokenArc(marks.curb2.x + 10, 3, 55, marks.curb2.y + 20, 80); // over curb 2
+    tokenArcOn(marks.curb1.x + 10, 3, 55, 55);                   // over curb 1
+    tokenArcOn(marks.curb2.x + 10, 3, 55, 60);                   // over curb 2
     tokenRow(1700, 1900, 4, 30);                                 // up the hill
     battery(2060);
     tokenRow(1990, 2170, 3, 30);                                 // hill top
@@ -164,7 +173,7 @@ window.DEF = window.DEF || {};
     tokenArc(padStart.x + 435, 3, 40, py + 30, 60);
     battery(padStart.x + 700, 34);                               // landing
     tokenRow(marks.gravel.x + 60, marks.gravel.x + 380, 5, 30);  // gravel path
-    tokenArc(marks.hills.x + 260, 4, 80, marks.hills.y - 60, 40);// first hill
+    tokenArcOn(marks.hills.x + 260, 4, 80, 40);                  // first hill
     battery(marks.hills.x + 400);
     tokenRow(marks.hills.x + 690, marks.hills.x + 790, 3, 30);
     tokenRow(marks.final.x + 100, marks.final.x + 480, 6, 30);   // last ramp
