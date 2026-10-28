@@ -1,4 +1,4 @@
-# Deficientezinho: um passeio do caralho
+# Deficientezinho: um passeio do cara***
 
 A 2D platformer where you roll a wheelchair through an obstacle course built
 (like most cities) by people who never tried it. Curbs, ramps, a staircase-only
