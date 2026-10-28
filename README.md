@@ -10,10 +10,10 @@ A 2D platformer where you roll a wheelchair through an obstacle course built
 
 | Key | Action |
 | --- | --- |
-| `←` `→` / `A` `D` | Roll |
-| `Space` / `↑` / `W` | Hop (hold for a taller hop) |
+| `←` `→` / `A` `D` / numpad `4` `6` | Roll |
+| `Space` / `↑` / `W` / numpad `8` or `0` | Hop (hold for a taller hop) |
 | `Shift` / `X` | Boost (drains the battery) |
-| `↓` / `S` | Brake |
+| `↓` / `S` / numpad `2` or `5` | Brake |
 | `P` / `R` / `M` | Pause / restart / mute |
 
 Touch devices get on-screen buttons.

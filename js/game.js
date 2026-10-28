@@ -59,10 +59,10 @@ window.DEF = window.DEF || {};
   var touch = { left: false, right: false, hop: false, boost: false };
 
   var KEYMAP = {
-    ArrowLeft: 'left', KeyA: 'left',
-    ArrowRight: 'right', KeyD: 'right',
-    ArrowDown: 'down', KeyS: 'down',
-    ArrowUp: 'hop', KeyW: 'hop', Space: 'hop',
+    ArrowLeft: 'left', KeyA: 'left', Numpad4: 'left',
+    ArrowRight: 'right', KeyD: 'right', Numpad6: 'right',
+    ArrowDown: 'down', KeyS: 'down', Numpad2: 'down', Numpad5: 'down',
+    ArrowUp: 'hop', KeyW: 'hop', Space: 'hop', Numpad8: 'hop', Numpad0: 'hop',
     ShiftLeft: 'boost', ShiftRight: 'boost', KeyX: 'boost', KeyK: 'boost'
   };
   var held = {};
@@ -86,8 +86,8 @@ window.DEF = window.DEF || {};
       e.preventDefault();
     }
     if (e.repeat) return;
-    if (S.mode === 'title' && (e.code === 'Space' || e.code === 'Enter')) { startRun(); e.preventDefault(); return; }
-    if (S.mode === 'win' && (e.code === 'Enter' || e.code === 'KeyR')) { startRun(); return; }
+    if (S.mode === 'title' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter')) { startRun(); e.preventDefault(); return; }
+    if (S.mode === 'win' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'KeyR')) { startRun(); return; }
     if (e.code === 'KeyR' && (S.mode === 'play' || S.mode === 'pause')) startRun();
     if ((e.code === 'KeyP' || e.code === 'Escape') && (S.mode === 'play' || S.mode === 'pause')) {
       S.mode = S.mode === 'play' ? 'pause' : 'play';
