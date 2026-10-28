@@ -28,7 +28,7 @@ in the browser.
 
 - **Boost mode:** *Toggle* (default: press numpad `5` / `B` once to turn boost on, again to turn it off) or *Hold*.
 - **Language:** Português (Portugal, the default) or English.
-- **Character:** *Clássico*, or the hand-drawn Deficientezinho from the logo.
+- **Character:** the hand-drawn Deficientezinho from the logo (the default), or *Clássico*.
 
 ## How the level works
 

@@ -58,10 +58,10 @@ window.DEF = window.DEF || {};
   // ---- Settings (remembered in the browser) --------------------------------
   // boostMode: 'toggle' = press the boost key once to turn boost on, again to
   //            turn it off (no holding). 'hold' = boost only while the key is held.
-  var SETTINGS_KEY = 'def.settings';
+  var SETTINGS_KEY = 'def.settings.v2';   // bump the suffix to reset everyone's saved choices to the defaults
   //  lang: 'pt' (Portugal, the default) or 'en'; see js/i18n.js.
-  //  avatar: 'classic' or 'logo' (the hand-drawn Deficientezinho from the logo).
-  var settings = { boostMode: 'toggle', lang: 'pt', avatar: 'classic' };
+  //  avatar: 'logo' (the hand-drawn Deficientezinho, the default) or 'classic'.
+  var settings = { boostMode: 'toggle', lang: 'pt', avatar: 'logo' };
   try {
     var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
     if (saved && (saved.boostMode === 'hold' || saved.boostMode === 'toggle')) settings.boostMode = saved.boostMode;
