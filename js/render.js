@@ -1,5 +1,5 @@
 /* Deficientezinho — drawing. Everything is vector shapes, no image files.
- * Swap the THEME colours to match the Efficienzino brand. */
+ * Swap the THEME colours to match your brand. */
 window.DEF = window.DEF || {};
 
 (function () {
@@ -357,7 +357,7 @@ window.DEF = window.DEF || {};
     line(fx - 50, fy, fx - 50, fy - 150, 8, '#4b5469', 'butt');
     line(fx + 50, fy, fx + 50, fy - 150, 8, '#4b5469', 'butt');
     ctx.fillStyle = THEME.brand; roundRect(fx - 66, fy - 176, 132, 40, 8); ctx.fill();
-    text('EFFICIENZINO', fx, fy - 149, { size: 17, align: 'center', color: '#fff' });
+    text('FINISH', fx, fy - 149, { size: 17, align: 'center', color: '#fff' });
     // checkered banner
     for (var i = 0; i < 10; i++) {
       for (var j = 0; j < 2; j++) {

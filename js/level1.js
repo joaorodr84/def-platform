@@ -189,7 +189,7 @@ window.DEF = window.DEF || {};
      * 6. SIGNS, CHECKPOINTS, SCENERY
      * ------------------------------------------------------------- */
     function sign(sx, text) { L.signs.push({ x: sx, y: terrainTop(sx), text: text }); }
-    sign(130,  'EFFICIENZINO™ ACCESSIBILITY TOUR. Roll with ← → (or A / D).');
+    sign(130,  'ACCESSIBILITY TOUR. Roll with ← → (or A / D).');
     sign(320,  'Hop with SPACE / ↑ / W. Hold it for a taller hop.');
     sign(500,  'Hold SHIFT to boost. It drains the battery — grab the ⚡ to refill.');
     sign(630,  'CURB AHEAD. “Only 10 cm,” said the architect.');
