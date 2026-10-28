@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Deficientezinho — an Efficienzino game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="960" height="540" aria-label="Deficientezinho platformer game"></canvas>
+    <div id="touch" hidden>
+      <div class="pad left">
+        <button id="tl" aria-label="Roll left">&#9664;</button>
+        <button id="tr" aria-label="Roll right">&#9654;</button>
+      </div>
+      <div class="pad right">
+        <button id="tb" aria-label="Boost">&#9889;</button>
+        <button id="th" aria-label="Hop">&#9650;</button>
+      </div>
+    </div>
+  </div>
+  <noscript>This game needs JavaScript.</noscript>
+
+  <script src="js/level1.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
