@@ -24,6 +24,7 @@ window.DEF = window.DEF || {};
   };
 
   var ctx, S, PH;
+  var tr = function (k, a) { return DEF.i18n.t(k, a); };
 
   // ---- Seeded scenery -------------------------------------------------------
   function rng(seed) {
@@ -292,7 +293,7 @@ window.DEF = window.DEF || {};
     }
     // sign
     ctx.fillStyle = THEME.brandDark; roundRect(d.x + d.w / 2 - 190, d.top + 22, 380, 44, 8); ctx.fill();
-    text(d.label, d.x + d.w / 2, d.top + 52, { size: 24, align: 'center', color: '#fff' });
+    text(tr(d.label), d.x + d.w / 2, d.top + 52, { size: 24, align: 'center', color: '#fff' });
     // door at plateau level
     ctx.fillStyle = '#3a4258'; roundRect(d.doorX - 28, d.doorY - 84, 56, 84, 6); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(d.doorX - 22, d.doorY - 78, 44, 30);
@@ -302,7 +303,7 @@ window.DEF = window.DEF || {};
     ctx.fillStyle = '#5a6278'; roundRect(ex - 34, d.doorY - 92, 68, 92, 4); ctx.fill();
     ctx.fillStyle = '#aab3c7'; ctx.fillRect(ex - 28, d.doorY - 86, 27, 86); ctx.fillRect(ex + 1, d.doorY - 86, 27, 86);
     ctx.fillStyle = '#d33'; ctx.fillRect(ex - 40, d.doorY - 118, 80, 18);
-    text('OUT OF ORDER', ex, d.doorY - 104, { size: 11, align: 'center', color: '#fff' });
+    text(tr('elevator.broken'), ex, d.doorY - 104, { size: 11, align: 'center', color: '#fff' });
     // stairs railing hint (the "main entrance")
     ctx.globalAlpha = 1;
   }
@@ -324,7 +325,7 @@ window.DEF = window.DEF || {};
     });
     if (best) {
       ctx.font = 'bold 15px ' + THEME.font;
-      var lines = wrap(best.text, 260);
+      var lines = wrap(tr(best.text), 260);
       var w = 290, h = 22 + lines.length * 20;
       var bx = best.x - w / 2, by = best.y - 84 - h;
       ctx.globalAlpha = Math.min(1, (190 - bd) / 60);
@@ -357,7 +358,7 @@ window.DEF = window.DEF || {};
     line(fx - 50, fy, fx - 50, fy - 150, 8, '#4b5469', 'butt');
     line(fx + 50, fy, fx + 50, fy - 150, 8, '#4b5469', 'butt');
     ctx.fillStyle = THEME.brand; roundRect(fx - 66, fy - 176, 132, 40, 8); ctx.fill();
-    text('FINISH', fx, fy - 149, { size: 17, align: 'center', color: '#fff' });
+    text(tr('finish.label'), fx, fy - 149, { size: 17, align: 'center', color: '#fff' });
     // checkered banner
     for (var i = 0; i < 10; i++) {
       for (var j = 0; j < 2; j++) {
@@ -415,6 +416,104 @@ window.DEF = window.DEF || {};
   }
 
   // ---- The hero --------------------------------------------------------------
+  // ---- Avatar 2: the hand-drawn Deficientezinho from the logo ---------------
+  // Crayon look: wobbly outlines that "boil" a little, scribbled blue body,
+  // lumpy black wheels with irregular holes, red smile, red shoe.
+  var CRAYON = { ink: '#1b1b1b', head: '#ece7de', blue: '#1f5fae', arm: '#4a4a4a', red: '#c8244a' };
+
+  function wobble(i, seed) {
+    var f = Math.floor(S.clock * 8) % 3;             // 3 frames of "boil"
+    return Math.sin(i * 12.9898 + seed * 78.233 + f * 1.7) * 0.7;
+  }
+  // A slightly curvy hand-drawn line
+  function crayon(x1, y1, x2, y2, w, color, seed) {
+    var mx = (x1 + x2) / 2 + wobble(1, seed) * 1.6, my = (y1 + y2) / 2 + wobble(2, seed) * 1.6;
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(x1 + wobble(3, seed) * 0.5, y1 + wobble(4, seed) * 0.5);
+    ctx.quadraticCurveTo(mx, my, x2, y2); ctx.stroke();
+  }
+  // A lumpy blob ring: outer radius r, hole is a rounded triangle that rotates.
+  function lumpyWheel(cx, cy, r, rot, seed) {
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
+    ctx.fillStyle = '#2a2a2a';
+    ctx.beginPath();
+    var n = 18, i, a, rr;
+    for (i = 0; i <= n; i++) {
+      a = i / n * TAU; rr = r * (1 + 0.05 * Math.sin(a * 3 + seed) + 0.025 * Math.sin(a * 5 + seed * 2));
+      ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    ctx.closePath();
+    for (i = 0; i <= 12; i++) {                          // hole, drawn the other way round
+      a = -i / 12 * TAU; rr = r * 0.42 * (1 + 0.3 * Math.cos(a * 3));
+      ctx[i ? 'lineTo' : 'moveTo'](r * 0.1 + Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    ctx.closePath();
+    ctx.fill('evenodd');
+    ctx.restore();
+  }
+
+  function drawLogoAvatar(p) {
+    var C = CRAYON;
+    var hx0 = -6, hy0 = -33;                 // hip
+    // rear wheel and front caster (behind the body)
+    lumpyWheel(-6, -17, 17, p.wheelRot, 1);
+    lumpyWheel(25, -6, 6, p.wheelRot * 1.6, 3);
+
+    // legs: thick scribbled blue, thigh then shin down to the red shoe
+    crayon(hx0, hy0, 22, -35, 9, C.blue, 2);
+    crayon(22, -35, 27, -15, 8, C.blue, 3);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1;
+    [[0, -3], [7, -2], [14, -4]].forEach(function (h, i) {
+      ctx.beginPath(); ctx.moveTo(hx0 + 4 + h[0], -37 + h[1]); ctx.lineTo(hx0 + 9 + h[0], -31 + h[1] + wobble(i, 5)); ctx.stroke();
+    });
+    // red shoe
+    ctx.fillStyle = C.red; ctx.beginPath();
+    ctx.ellipse(28, -12, 7, 5.5, 0.2, 0, TAU); ctx.fill();
+
+    // torso: blue scribble leaning slightly forward
+    crayon(hx0, hy0 + 2, -8, -58, 13, C.blue, 4);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1;
+    for (var k = 0; k < 4; k++) {
+      ctx.beginPath(); ctx.moveTo(-12, -38 - k * 5); ctx.lineTo(-5, -41 - k * 5 + wobble(k, 6)); ctx.stroke();
+    }
+
+    // pushing arm (gray stick) with a black fist: rests forward, pushes on the wheel
+    var moving = Math.abs(p.vx) > 5;
+    var a2 = -1.0 + 0.55 * Math.sin(p.push);
+    var fx = moving ? -6 + 15 * Math.cos(a2) : 11, fy = moving ? -17 + 15 * Math.sin(a2) : -50;
+    crayon(-8, -57, (-8 + fx) / 2 + 2, (-57 + fy) / 2 - 3, 4.5, C.arm, 5);
+    crayon((-8 + fx) / 2 + 2, (-57 + fy) / 2 - 3, fx, fy, 4.5, C.arm, 6);
+    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(fx, fy, 4.2, 0, TAU); ctx.fill();
+
+    // other arm: raised and waving (stays up, waves when standing still)
+    var wave = moving ? 0 : Math.sin(S.clock * 5) * 5;
+    crayon(-9, -58, -19, -76 + wave * 0.4, 4.5, C.arm, 7);
+    ctx.fillStyle = C.arm; ctx.beginPath(); ctx.ellipse(-20, -80 + wave * 0.4, 4, 5.5, -0.3, 0, TAU); ctx.fill();
+
+    // head: big off-white circle with a hand-drawn outline
+    var hcx = -3, hcy = -75, hr = 13.5;
+    ctx.fillStyle = C.head; ctx.beginPath(); ctx.arc(hcx, hcy, hr, 0, TAU); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (var i = 0; i <= 20; i++) {
+      var ang = i / 20 * TAU, rr = hr + wobble(i, 8) * 0.8;
+      ctx[i ? 'lineTo' : 'moveTo'](hcx + Math.cos(ang) * rr, hcy + Math.sin(ang) * rr);
+    }
+    ctx.stroke();
+    // spiky hair
+    [-165, -135, -105, -75, -45, -15].forEach(function (deg, i) {
+      var r1 = hr - 1, r2 = hr + 9 + (i % 2) * 4, d = deg * Math.PI / 180;
+      crayon(hcx + Math.cos(d) * r1, hcy + Math.sin(d) * r1, hcx + Math.cos(d) * r2, hcy + Math.sin(d) * r2, 2.2, C.ink, 9 + i);
+    });
+    // face: "D" eye, black nose triangle, red smile
+    ctx.fillStyle = C.ink;
+    ctx.beginPath(); ctx.moveTo(hcx + 4, hcy - 4); ctx.lineTo(hcx + 9, hcy - 2); ctx.lineTo(hcx + 5, hcy + 3); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(hcx - 4, hcy - 4); ctx.lineTo(hcx - 2, hcy - 4); ctx.lineTo(hcx - 2, hcy + 1); ctx.lineTo(hcx - 4, hcy + 1); ctx.stroke();
+    ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(hcx + 1, hcy + 2, 6.5, 0.35, 1.45); ctx.stroke();
+  }
+
   function drawPlayer(p) {
     var flick = p.invuln > 0 && Math.floor(S.clock * 16) % 2 === 0;
     ctx.save();
@@ -434,6 +533,8 @@ window.DEF = window.DEF || {};
       ctx.fillStyle = THEME.accent;
       ctx.beginPath(); ctx.moveTo(-16, -22); ctx.lineTo(-34 - Math.random() * 10, -17); ctx.lineTo(-16, -12); ctx.closePath(); ctx.fill();
     }
+
+    if (S.settings.avatar === 'logo') { drawLogoAvatar(p); ctx.restore(); return; }
 
     // front caster + fork
     line(14, -28, 19, -10, 3, '#4b5469');
@@ -491,7 +592,7 @@ window.DEF = window.DEF || {};
   // ---- HUD / overlays --------------------------------------------------------
   function fmt(t) {
     var m = Math.floor(t / 60), s = t - m * 60;
-    return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1);
+    return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1).replace('.', DEF.i18n.decimal());
   }
 
   function drawHUD() {
@@ -511,25 +612,25 @@ window.DEF = window.DEF || {};
       ctx.fillStyle = on ? '#9bf06a' : 'rgba(255,255,255,0.18)'; ctx.fillRect(176 + i * 36 + 28, 27, 3, 8);
     }
     // boost bar
-    text('BOOST', 24, 76, { size: 12, color: '#cfe7ee' });
-    ctx.fillStyle = 'rgba(255,255,255,0.16)'; roundRect(76, 66, 214, 12, 6); ctx.fill();
-    var bw = 214 * (p.boost / 100);
+    text(S.boostOn ? tr('hud.boostOn') : tr('hud.boost'), 24, 76, { size: 11, color: S.boostOn ? '#ffd24a' : '#cfe7ee' });
+    ctx.fillStyle = 'rgba(255,255,255,0.16)'; roundRect(90, 66, 200, 12, 6); ctx.fill();
+    var bw = 200 * (p.boost / 100);
     if (bw > 1) {
-      ctx.fillStyle = p.boosting ? '#ffd24a' : THEME.accent; roundRect(76, 66, bw, 12, 6); ctx.fill();
+      ctx.fillStyle = p.boosting ? '#ffd24a' : THEME.accent; roundRect(90, 66, bw, 12, 6); ctx.fill();
     }
 
     // time
     ctx.fillStyle = 'rgba(11,30,38,0.62)'; roundRect(S.W - 190, 12, 178, 56, 12); ctx.fill();
     text(fmt(S.time), S.W - 101, 43, { size: 24, align: 'center' });
-    text('par ' + fmt(S.level.par), S.W - 101, 60, { size: 11, align: 'center', color: '#cfe7ee' });
+    text(tr('hud.par', fmt(S.level.par)), S.W - 101, 60, { size: 11, align: 'center', color: '#cfe7ee' });
 
     // toasts
     S.toasts.forEach(function (t, i) {
       ctx.globalAlpha = Math.min(1, t.t * 2);
-      text(t.msg, S.W / 2, 100 + i * 28, { size: 20, align: 'center', stroke: 'rgba(11,30,38,0.7)', strokeW: 5 });
+      text(tr(t.msg), S.W / 2, 100 + i * 28, { size: 20, align: 'center', stroke: 'rgba(11,30,38,0.7)', strokeW: 5 });
       ctx.globalAlpha = 1;
     });
-    if (S.muted) text('muted (M)', S.W - 14, S.H - 12, { size: 12, align: 'right', color: '#fff' });
+    if (S.muted) text(tr('hud.muted'), S.W - 14, S.H - 12, { size: 12, align: 'right', color: '#fff' });
   }
 
   function panel(w, h) {
@@ -541,32 +642,73 @@ window.DEF = window.DEF || {};
   }
 
   function drawTitle() {
-    var o = panel(640, 380);
+    var o = panel(680, 380);
     var cx = S.W / 2;
     text('DEFICIENTEZINHO', cx, o.y + 84, { size: 50, align: 'center', color: THEME.brandDark });
-    text(S.level.name, cx, o.y + 122, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
-    var rows = [
-      ['← →  /  A D', 'roll'],
-      ['SPACE  /  ↑  /  W', 'hop (hold = taller)'],
-      ['SHIFT  /  X', 'boost (uses battery)'],
-      ['↓  /  S', 'brake'],
-      ['P  /  R  /  M', 'pause / restart / mute']
-    ];
-    rows.forEach(function (r, i) {
-      text(r[0], cx - 20, o.y + 180 + i * 26, { size: 16, align: 'right', color: THEME.ink });
-      text(r[1], cx + 4, o.y + 180 + i * 26, { size: 16, color: '#5a6278', weight: '600' });
+    text(tr(S.level.name), cx, o.y + 122, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
+    ['roll', 'hop', 'boost', 'brake', 'misc'].forEach(function (k, i) {
+      text(tr('ctl.' + k + '.key'), cx - 20, o.y + 180 + i * 26, { size: 16, align: 'right', color: THEME.ink });
+      text(tr('ctl.' + k + '.do'), cx + 4, o.y + 180 + i * 26, { size: 16, color: '#5a6278', weight: '600' });
     });
     var pulse = 0.65 + 0.35 * Math.sin(S.clock * 4);
     ctx.globalAlpha = pulse;
-    text('Press SPACE or ENTER to start (or tap)', cx, o.y + 338, { size: 20, align: 'center', color: THEME.brand });
+    text(tr('title.press'), cx, o.y + 336, { size: 20, align: 'center', color: THEME.brand });
     ctx.globalAlpha = 1;
-    if (S.best) text('Best time: ' + fmt(S.best), cx, o.y + 364, { size: 13, align: 'center', color: '#5a6278', weight: '600' });
+    if (S.best) text(tr('title.best', fmt(S.best)), cx, o.y + 362, { size: 13, align: 'center', color: '#5a6278', weight: '600' });
   }
 
   function drawPause() {
-    var o = panel(380, 160);
-    text('PAUSED', S.W / 2, o.y + 70, { size: 38, align: 'center', color: THEME.brandDark });
-    text('Press P to continue', S.W / 2, o.y + 112, { size: 17, align: 'center', color: '#5a6278' });
+    var o = panel(420, 160);
+    text(tr('pause.title'), S.W / 2, o.y + 70, { size: 38, align: 'center', color: THEME.brandDark });
+    text(tr('pause.hint'), S.W / 2, o.y + 112, { size: 17, align: 'center', color: '#5a6278' });
+  }
+
+  function drawSettingsHint() {
+    ctx.font = 'bold 16px ' + THEME.font;
+    var label = tr('settings.btn'), w = ctx.measureText(label).width + 36;
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'; roundRect(S.W - w - 14, S.H - 50, w, 36, 10); ctx.fill();
+    text(label, S.W - 14 - w / 2, S.H - 26, { size: 16, align: 'center', color: THEME.brandDark });
+  }
+
+  // Settings layout (the click areas in game.js use the same numbers):
+  // panel 660x496. rows: 0 = boost mode, 1 = language, 2 = avatar, then Back.
+  function choice(x, y, label, on) {
+    ctx.fillStyle = on ? THEME.brand : '#e3e8f0'; roundRect(x, y, 150, 44, 10); ctx.fill();
+    text(label, x + 75, y + 30, { size: 19, align: 'center', color: on ? '#fff' : '#7b8499' });
+  }
+  function rowFrame(o, y, h) {
+    ctx.strokeStyle = THEME.brand; ctx.lineWidth = 3; roundRect(o.x + 24, o.y + y, 612, h, 12); ctx.stroke();
+  }
+
+  function drawSettings() {
+    var o = panel(660, 496), cx = S.W / 2, toggle = S.settings.boostMode === 'toggle';
+    var row = S.settingsRow;
+    text(tr('settings.title'), cx, o.y + 48, { size: 30, align: 'center', color: THEME.brandDark });
+
+    // Row 0: boost mode
+    if (row === 0) rowFrame(o, 62, 160);
+    text(tr('settings.boost'), cx, o.y + 90, { size: 18, align: 'center', color: '#5a6278' });
+    choice(cx - 160, o.y + 102, tr('settings.toggle'), toggle);
+    choice(cx + 10, o.y + 102, tr('settings.hold'), !toggle);
+    text(tr(toggle ? 'settings.toggle1' : 'settings.hold1'), cx, o.y + 178, { size: 15, align: 'center', color: THEME.ink, weight: '600' });
+    text(tr(toggle ? 'settings.toggle2' : 'settings.hold2'), cx, o.y + 200, { size: 15, align: 'center', color: THEME.ink, weight: '600' });
+
+    // Row 1: language
+    if (row === 1) rowFrame(o, 232, 90);
+    text(tr('settings.lang'), cx, o.y + 258, { size: 18, align: 'center', color: '#5a6278' });
+    DEF.i18n.langs.forEach(function (l, i) {
+      choice(cx - 160 + i * 170, o.y + 270, l.name, DEF.i18n.code() === l.code);
+    });
+
+    // Row 2: avatar
+    if (row === 2) rowFrame(o, 332, 90);
+    text(tr('settings.avatar'), cx, o.y + 358, { size: 18, align: 'center', color: '#5a6278' });
+    choice(cx - 160, o.y + 370, tr('settings.avatar.classic'), S.settings.avatar !== 'logo');
+    choice(cx + 10, o.y + 370, tr('settings.avatar.logo'), S.settings.avatar === 'logo');
+
+    text(tr('settings.hint'), cx, o.y + 444, { size: 14, align: 'center', color: '#5a6278' });
+    ctx.fillStyle = '#e3e8f0'; roundRect(cx - 100, o.y + 452, 200, 34, 10); ctx.fill();
+    text(tr('settings.back'), cx, o.y + 475, { size: 16, align: 'center', color: THEME.brandDark });
   }
 
   function star(x, y, r, on) {
@@ -580,24 +722,24 @@ window.DEF = window.DEF || {};
   }
 
   function drawWin() {
-    var o = panel(560, 400), r = S.result, cx = S.W / 2;
-    text('LEVEL COMPLETE', cx, o.y + 62, { size: 38, align: 'center', color: THEME.brandDark });
+    var o = panel(600, 400), r = S.result, cx = S.W / 2;
+    text(tr('win.title'), cx, o.y + 62, { size: 38, align: 'center', color: THEME.brandDark });
     for (var i = 0; i < 3; i++) star(cx + (i - 1) * 76, o.y + 128, 32, i < r.stars);
     var rows = [
-      ['Time', fmt(r.time) + (r.time <= S.level.par ? '   (under par!)' : '   (par ' + fmt(S.level.par) + ')')],
-      ['Tokens', r.tokens + ' / ' + r.total],
-      ['Carts squashed', String(r.stomps)],
-      ['Trips to checkpoints', String(r.deaths)]
+      [tr('win.time'), fmt(r.time) + '   ' + (r.time <= S.level.par ? tr('win.under') : tr('win.par', fmt(S.level.par)))],
+      [tr('win.tokens'), r.tokens + ' / ' + r.total],
+      [tr('win.stomps'), String(r.stomps)],
+      [tr('win.deaths'), String(r.deaths)]
     ];
-    if (S.best) rows.push(['Best time', fmt(S.best)]);
+    if (S.best) rows.push([tr('win.best'), fmt(S.best)]);
     rows.forEach(function (row, i) {
       text(row[0], cx - 20, o.y + 200 + i * 28, { size: 17, align: 'right', color: '#5a6278' });
       text(row[1], cx, o.y + 200 + i * 28, { size: 17, color: THEME.ink });
     });
-    text('★ finish   ★ 80% tokens   ★ beat par', cx, o.y + 330, { size: 13, align: 'center', color: '#5a6278', weight: '600' });
+    text(tr('win.legend'), cx, o.y + 346, { size: 13, align: 'center', color: '#5a6278', weight: '600' });
     var pulse = 0.65 + 0.35 * Math.sin(S.clock * 4);
     ctx.globalAlpha = pulse;
-    text('ENTER or R to roll again', cx, o.y + 370, { size: 19, align: 'center', color: THEME.brand });
+    text(tr('win.again'), cx, o.y + 382, { size: 19, align: 'center', color: THEME.brand });
     ctx.globalAlpha = 1;
   }
 
@@ -641,5 +783,7 @@ window.DEF = window.DEF || {};
     if (S.mode === 'title') drawTitle();
     else if (S.mode === 'pause') drawPause();
     else if (S.mode === 'win') drawWin();
+    if ((S.mode === 'title' || S.mode === 'pause') && !S.settingsOpen) drawSettingsHint();
+    if (S.settingsOpen) drawSettings();
   };
 })();

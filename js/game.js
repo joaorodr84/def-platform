@@ -26,7 +26,8 @@ window.DEF = window.DEF || {};
     GRAV: 1500,
     FALL_MULT: 1.3,
     CUT_MULT: 3,       // extra gravity when hop is released early
-    HOP_V: 430,
+    HOP_V: 500,        // hop speed: ~83px tall held, ~50px on a quick tap
+    AIR_ACC: 1400,     // steering while airborne (strong, so one tap of a direction is enough)
     MAXFALL: 900,
     COYOTE: 0.1,
     BUFFER: 0.12,
@@ -54,16 +55,34 @@ window.DEF = window.DEF || {};
   window.addEventListener('resize', fitCanvas);
   fitCanvas();
 
+  // ---- Settings (remembered in the browser) --------------------------------
+  // boostMode: 'toggle' = press the boost key once to turn boost on, again to
+  //            turn it off (no holding). 'hold' = boost only while the key is held.
+  var SETTINGS_KEY = 'def.settings';
+  //  lang: 'pt' (Portugal, the default) or 'en'; see js/i18n.js.
+  //  avatar: 'classic' or 'logo' (the hand-drawn Deficientezinho from the logo).
+  var settings = { boostMode: 'toggle', lang: 'pt', avatar: 'classic' };
+  try {
+    var saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if (saved && (saved.boostMode === 'hold' || saved.boostMode === 'toggle')) settings.boostMode = saved.boostMode;
+    if (saved && (saved.lang === 'pt' || saved.lang === 'en')) settings.lang = saved.lang;
+    if (saved && (saved.avatar === 'classic' || saved.avatar === 'logo')) settings.avatar = saved.avatar;
+  } catch (err) { /* no storage: defaults are fine */ }
+  DEF.i18n.set(settings.lang);
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (err) { /* ignore */ }
+  }
+
   // ---- Input ---------------------------------------------------------------
-  var input = { left: false, right: false, down: false, hop: false, boost: false };
-  var touch = { left: false, right: false, hop: false, boost: false };
+  var input = { left: false, right: false, down: false, hop: false };
+  var touch = { left: false, right: false, hop: false };
 
   var KEYMAP = {
     ArrowLeft: 'left', KeyA: 'left', Numpad4: 'left',
     ArrowRight: 'right', KeyD: 'right', Numpad6: 'right',
-    ArrowDown: 'down', KeyS: 'down', Numpad2: 'down', Numpad5: 'down',
+    ArrowDown: 'down', KeyS: 'down', Numpad2: 'down',
     ArrowUp: 'hop', KeyW: 'hop', Space: 'hop', Numpad8: 'hop', Numpad0: 'hop',
-    ShiftLeft: 'boost', ShiftRight: 'boost', KeyX: 'boost', KeyK: 'boost'
+    Numpad5: 'boost', KeyB: 'boost'
   };
   var held = {};
 
@@ -74,18 +93,70 @@ window.DEF = window.DEF || {};
     var hop = !!(held.hop || touch.hop);
     if (hop && !input.hop) S.hopBuf = PH.BUFFER;
     input.hop = hop;
-    input.boost = !!(held.boost || touch.boost);
   }
+
+  // Boost: one key does everything, so nobody has to hold two keys at once.
+  function setBoost(on) {
+    S.boostOn = !!on && !(S.player && S.player.boost <= 0);
+    var b = document.getElementById('tb');
+    if (b) b.classList.toggle('on', S.boostOn);
+  }
+  function boostPressed() {
+    if (S.mode !== 'play') return;
+    setBoost(settings.boostMode === 'toggle' ? !S.boostOn : true);
+  }
+  function boostReleased() {
+    if (settings.boostMode === 'hold') setBoost(false);
+  }
+
+  function openSettings() { S.settingsOpen = true; S.settingsRow = 0; if (S.mode === 'play') S.mode = 'pause'; }
+  function closeSettings() { S.settingsOpen = false; }
+  // Row 0 = boost mode, row 1 = language, row 2 = avatar. A press flips the selected row.
+  function changeSetting(row) {
+    if (row === 0) {
+      settings.boostMode = settings.boostMode === 'toggle' ? 'hold' : 'toggle';
+      setBoost(false);
+    } else if (row === 1) {
+      settings.lang = settings.lang === 'pt' ? 'en' : 'pt';
+      DEF.i18n.set(settings.lang);
+    } else {
+      settings.avatar = settings.avatar === 'logo' ? 'classic' : 'logo';
+    }
+    saveSettings();
+    DEF.audio.checkpoint();
+  }
+
+  var SETTINGS_FLIP = ['Space', 'Enter', 'NumpadEnter', 'Numpad5', 'ArrowLeft', 'ArrowRight', 'Numpad4', 'Numpad6'];
+  var SETTINGS_BACK = ['KeyO', 'Escape', 'KeyP'];
+  var SETTINGS_UP = ['ArrowUp', 'KeyW', 'Numpad8'];
+  var SETTINGS_DOWN = ['ArrowDown', 'KeyS', 'Numpad2'];
 
   window.addEventListener('keydown', function (e) {
     DEF.audio.init();
+    // Settings screen swallows every key
+    if (S.settingsOpen) {
+      if (!e.repeat) {
+        if (SETTINGS_FLIP.indexOf(e.code) >= 0) changeSetting(S.settingsRow);
+        else if (SETTINGS_UP.indexOf(e.code) >= 0) S.settingsRow = Math.max(0, S.settingsRow - 1);
+        else if (SETTINGS_DOWN.indexOf(e.code) >= 0) S.settingsRow = Math.min(2, S.settingsRow + 1);
+        else if (SETTINGS_BACK.indexOf(e.code) >= 0) closeSettings();
+      }
+      e.preventDefault();
+      return;
+    }
     var a = KEYMAP[e.code];
+    if (a === 'boost') {
+      if (!e.repeat) boostPressed();
+      e.preventDefault();
+      return;
+    }
     if (a) {
       held[a] = true;
       recomputeInput();
       e.preventDefault();
     }
     if (e.repeat) return;
+    if (e.code === 'KeyO' && S.mode !== 'win') { openSettings(); return; }
     if (S.mode === 'title' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter')) { startRun(); e.preventDefault(); return; }
     if (S.mode === 'win' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'KeyR')) { startRun(); return; }
     if (e.code === 'KeyR' && (S.mode === 'play' || S.mode === 'pause')) startRun();
@@ -96,16 +167,30 @@ window.DEF = window.DEF || {};
   });
   window.addEventListener('keyup', function (e) {
     var a = KEYMAP[e.code];
+    if (a === 'boost') { boostReleased(); e.preventDefault(); return; }
     if (a) { held[a] = false; recomputeInput(); e.preventDefault(); }
   });
   window.addEventListener('blur', function () {
-    held = {}; touch.left = touch.right = touch.hop = touch.boost = false;
+    held = {}; touch.left = touch.right = touch.hop = false;
     recomputeInput();
+    boostReleased();
     if (S.mode === 'play') S.mode = 'pause';
   });
 
-  canvas.addEventListener('pointerdown', function () {
+  // Mouse / touch on the canvas (logical 960x540 coordinates)
+  canvas.addEventListener('pointerdown', function (e) {
     DEF.audio.init();
+    var r = canvas.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+    if (S.settingsOpen) {
+      var top = (H - 496) / 2;
+      if (y > top + 446) closeSettings();                           // Back button
+      else if (y > top + 332) { S.settingsRow = 2; changeSetting(2); }
+      else if (y > top + 232) { S.settingsRow = 1; changeSetting(1); }
+      else if (y > top + 62) { S.settingsRow = 0; changeSetting(0); }
+      return;
+    }
+    if (x > W - 190 && y > H - 56 && (S.mode === 'title' || S.mode === 'pause')) { openSettings(); return; }
     if (S.mode === 'title' || S.mode === 'win') startRun();
     else if (S.mode === 'pause') S.mode = 'play';
   });
@@ -118,9 +203,13 @@ window.DEF = window.DEF || {};
     function bind(id, key) {
       var b = document.getElementById(id);
       function set(v) { touch[key] = v; b.classList.toggle('on', v); recomputeInput(); }
-      b.addEventListener('pointerdown', function (e) { DEF.audio.init(); set(true); e.preventDefault(); });
+      b.addEventListener('pointerdown', function (e) {
+        DEF.audio.init(); e.preventDefault();
+        if (key === 'boost') { boostPressed(); return; }
+        set(true);
+      });
       ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) {
-        b.addEventListener(n, function () { set(false); });
+        b.addEventListener(n, function () { if (key === 'boost') boostReleased(); else set(false); });
       });
     }
     bind('tl', 'left'); bind('tr', 'right'); bind('th', 'hop'); bind('tb', 'boost');
@@ -138,6 +227,10 @@ window.DEF = window.DEF || {};
     tokens: [], batteries: [], carts: [], checkpoints: [], movers: [],
     particles: [], toasts: [],
     hopBuf: 0, coyote: 0,
+    boostOn: false,         // is boost currently on
+    settings: settings,
+    settingsOpen: false,
+    settingsRow: 0,
     muted: false,
     best: null,
     result: null,
@@ -211,6 +304,7 @@ window.DEF = window.DEF || {};
       });
     }
   }
+  // msg is a translation key (js/i18n.js)
   function toast(msg, secs) { S.toasts.push({ msg: msg, t: secs || 2.2 }); if (S.toasts.length > 3) S.toasts.shift(); }
 
   // ---- Run setup -----------------------------------------------------------
@@ -237,7 +331,7 @@ window.DEF = window.DEF || {};
     });
     S.checkpoints = L.checkpoints.map(function (c) { return { x: c.x, y: c.y, on: false }; });
     S.particles = []; S.toasts = [];
-    S.clock = 0; S.time = 0; S.hopBuf = 0; S.coyote = 0; S.shake = 0;
+    S.clock = 0; S.time = 0; S.hopBuf = 0; S.coyote = 0; S.shake = 0; S.boostOn = false;
     S.deaths = 0; S.result = null; S.stomps = 0;
     S.respawn = { x: L.spawn.x, y: solidTop(L.spawn.x) };
 
@@ -288,17 +382,18 @@ window.DEF = window.DEF || {};
     S.hopBuf -= dt;
 
     // Boost
-    p.boosting = input.boost && p.boost > 0 && (dir !== 0 || Math.abs(p.vx) > 60);
+    if (S.boostOn && p.boost <= 0) S.boostOn = false;
+    p.boosting = S.boostOn && p.boost > 0 && (dir !== 0 || Math.abs(p.vx) > 60);
     if (p.boosting) {
       p.boost = Math.max(0, p.boost - PH.BOOST_DRAIN * dt);
-    } else if (p.grounded && !input.boost) {
+    } else if (p.grounded && !S.boostOn) {
       p.boost = Math.min(100, p.boost + PH.BOOST_REGEN * dt);
     }
 
     var air = !p.grounded;
     var sf = SURF[p.surf] || SURF.pave;
     var cap = (p.boosting ? PH.BOOST_CAP : PH.BASE_CAP) * (air ? 1 : sf.cap);
-    var acc = (p.boosting ? PH.BOOST_ACC : PH.ACC) * (air ? 0.55 : sf.acc);
+    var acc = air ? PH.AIR_ACC : (p.boosting ? PH.BOOST_ACC : PH.ACC) * sf.acc;
 
     // Horizontal control
     if (dir !== 0) {
@@ -404,7 +499,7 @@ window.DEF = window.DEF || {};
     }
 
     // Fell into a pit
-    if (p.y > 760) respawn('Fell in a pit. Reimbursement request denied.');
+    if (p.y > 760) respawn('toast.pit');
   }
 
   function hurt(from) {
@@ -417,7 +512,7 @@ window.DEF = window.DEF || {};
     DEF.audio.hurt();
     S.shake = 0.25;
     puff(p.x, p.y - 30, 8, '#ff6b6b', 160, 120);
-    if (p.hearts <= 0) respawn('Out of battery cells. Back to the last checkpoint.');
+    if (p.hearts <= 0) respawn('toast.cells');
   }
 
   function updateCarts(dt) {
@@ -466,7 +561,7 @@ window.DEF = window.DEF || {};
         if (p.hearts < PH.HEARTS) p.hearts++;
         DEF.audio.battery();
         puff(b.x, b.y, 8, '#9bf06a', 140, 100);
-        toast('Battery recharged', 1.4);
+        toast('toast.battery', 1.4);
       }
     });
     S.checkpoints.forEach(function (c) {
@@ -474,7 +569,7 @@ window.DEF = window.DEF || {};
         c.on = true;
         S.respawn = { x: c.x, y: c.y };
         DEF.audio.checkpoint();
-        toast('Checkpoint', 1.6);
+        toast('toast.checkpoint', 1.6);
       }
     });
   }

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-PT">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -8,20 +8,21 @@
 </head>
 <body>
   <div id="wrap">
-    <canvas id="game" width="960" height="540" aria-label="Deficientezinho platformer game"></canvas>
+    <canvas id="game" width="960" height="540" aria-label="Deficientezinho"></canvas>
     <div id="touch" hidden>
       <div class="pad left">
-        <button id="tl" aria-label="Roll left">&#9664;</button>
-        <button id="tr" aria-label="Roll right">&#9654;</button>
+        <button id="tl" aria-label="←">&#9664;</button>
+        <button id="tr" aria-label="→">&#9654;</button>
       </div>
       <div class="pad right">
-        <button id="tb" aria-label="Boost">&#9889;</button>
-        <button id="th" aria-label="Hop">&#9650;</button>
+        <button id="tb" aria-label="Turbo">&#9889;</button>
+        <button id="th" aria-label="↑">&#9650;</button>
       </div>
     </div>
   </div>
-  <noscript>This game needs JavaScript.</noscript>
+  <noscript>Este jogo precisa de JavaScript. / This game needs JavaScript.</noscript>
 
+  <script src="js/i18n.js"></script>
   <script src="js/level1.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/render.js"></script>

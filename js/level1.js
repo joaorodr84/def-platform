@@ -21,7 +21,7 @@ window.DEF = window.DEF || {};
     var edges = [];     // vertical faces drawn for steps / cliffs
     var pits = [];      // gaps, for drawing the void
     var L = {
-      name: 'Level 1 — The Accessibility Tour',
+      name: 'level.name',            // translation key (see js/i18n.js)
       terrain: terrain, ramps: ramps, movers: movers, edges: edges, pits: pits,
       tokens: [], batteries: [], carts: [], signs: [], checkpoints: [],
       decor: [], spawn: { x: 90 }, finishX: 7640, worldEnd: 7860, par: 60
@@ -197,20 +197,21 @@ window.DEF = window.DEF || {};
     /* ---------------------------------------------------------------
      * 6. SIGNS, CHECKPOINTS, SCENERY
      * ------------------------------------------------------------- */
+    // `text` is a translation key from js/i18n.js
     function sign(sx, text) { L.signs.push({ x: sx, y: terrainTop(sx), text: text }); }
-    sign(130,  'ACCESSIBILITY TOUR. Roll with ← → (or A / D).');
-    sign(320,  'Hop with SPACE / ↑ / W. Hold it for a taller hop.');
-    sign(500,  'Hold SHIFT to boost. It drains the battery — grab the ⚡ to refill.');
-    sign(630,  'CURB AHEAD. “Only 10 cm,” said the architect.');
-    sign(1160, 'Another curb. They breed.');
-    sign(1560, 'RAMP! Downhill is free speed. That’s efficiency.');
-    sign(2120, 'GAP AHEAD. Bring speed. Gravity is your intern now.');
-    sign(rx0 - 40, 'MAIN ENTRANCE: 3 steps (70 cm each). Accessible entrance: the long ramp →');
-    sign(plateau.x + 480, 'ELEVATOR: out of order since 2019. Please use the stairs.');
-    sign(padStart.x - 40, 'BRIDGE UNDER CONSTRUCTION. Use the moving platforms. Safety first. (Not provided.)');
-    sign(marks.drain.x + 20, 'OPEN DRAIN. Totally normal city infrastructure.');
-    sign(marks.gravel.x - 30, 'PARK PATH: gravel. Scenic. Slow. Very slow.');
-    sign(marks.final.x - 20, 'LAST RAMP. Get a run-up, or hit SHIFT.');
+    sign(130,  'sign.start');
+    sign(320,  'sign.hop');
+    sign(500,  'sign.boost');
+    sign(630,  'sign.curb1');
+    sign(1160, 'sign.curb2');
+    sign(1560, 'sign.ramp');
+    sign(2120, 'sign.gap');
+    sign(rx0 - 40, 'sign.main');
+    sign(plateau.x + 480, 'sign.elev');
+    sign(padStart.x - 40, 'sign.bridge');
+    sign(marks.drain.x + 20, 'sign.drain');
+    sign(marks.gravel.x - 30, 'sign.gravel');
+    sign(marks.final.x - 20, 'sign.last');
 
     function checkpoint(cx) { L.checkpoints.push({ x: cx, y: terrainTop(cx) }); }
     checkpoint(marks.gap1.x + 175 + 40);
@@ -224,7 +225,7 @@ window.DEF = window.DEF || {};
     });
     L.decor.push({
       type: 'building', x: S - 30, w: 760, top: 40, y: GROUND,
-      label: 'MINISTRY OF PAPERWORK', doorX: plateau.x + 90, doorY: plateau.y,
+      label: 'building.label', doorX: plateau.x + 90, doorY: plateau.y,
       elevatorX: plateau.x + 440
     });
     [5230, 5340, 5460, 5700, 5990, 6280, 6560, 6820].forEach(function (tx) {
