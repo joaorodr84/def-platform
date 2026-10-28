@@ -543,9 +543,8 @@ window.DEF = window.DEF || {};
   function drawTitle() {
     var o = panel(640, 380);
     var cx = S.W / 2;
-    text('EFFICIENZINO presents', cx, o.y + 52, { size: 18, align: 'center', color: THEME.brand });
-    text('DEFICIENTEZINHO', cx, o.y + 100, { size: 50, align: 'center', color: THEME.brandDark });
-    text(S.level.name, cx, o.y + 136, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
+    text('DEFICIENTEZINHO', cx, o.y + 84, { size: 50, align: 'center', color: THEME.brandDark });
+    text(S.level.name, cx, o.y + 122, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
     var rows = [
       ['← →  /  A D', 'roll'],
       ['SPACE  /  ↑  /  W', 'hop (hold = taller)'],
