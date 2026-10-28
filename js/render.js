@@ -644,8 +644,9 @@ window.DEF = window.DEF || {};
   function drawTitle() {
     var o = panel(680, 380);
     var cx = S.W / 2;
-    text('DEFICIENTEZINHO', cx, o.y + 84, { size: 50, align: 'center', color: THEME.brandDark });
-    text(tr(S.level.name), cx, o.y + 122, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
+    text('DEFICIENTEZINHO', cx, o.y + 78, { size: 50, align: 'center', color: THEME.brandDark });
+    text(tr('title.tagline'), cx, o.y + 110, { size: 26, align: 'center', color: THEME.brand });
+    text(tr(S.level.name), cx, o.y + 146, { size: 18, align: 'center', color: '#5a6278', weight: '600' });
     ['roll', 'hop', 'boost', 'brake', 'misc'].forEach(function (k, i) {
       text(tr('ctl.' + k + '.key'), cx - 20, o.y + 180 + i * 26, { size: 16, align: 'right', color: THEME.ink });
       text(tr('ctl.' + k + '.do'), cx + 4, o.y + 180 + i * 26, { size: 16, color: '#5a6278', weight: '600' });

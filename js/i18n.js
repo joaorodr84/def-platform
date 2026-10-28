@@ -13,6 +13,7 @@ window.DEF = window.DEF || {};
     pt: {
       'level.name': 'Nível 1 — O Percurso da Acessibilidade',
 
+      'title.tagline': 'um passeio do caralho',
       'title.press': 'Prime ESPAÇO ou ENTER para começar (ou toca no ecrã)',
       'title.best': 'Melhor tempo: {0}',
       'ctl.roll.key': '← →  /  A D',            'ctl.roll.do': 'rolar',
@@ -83,6 +84,7 @@ window.DEF = window.DEF || {};
     en: {
       'level.name': 'Level 1 — The Accessibility Tour',
 
+      'title.tagline': 'um passeio do caralho',   // the game's title, kept as written
       'title.press': 'Press SPACE or ENTER to start (or tap)',
       'title.best': 'Best time: {0}',
       'ctl.roll.key': '← →  /  A D',            'ctl.roll.do': 'roll',
