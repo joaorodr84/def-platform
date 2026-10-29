@@ -156,5 +156,6 @@ them. Put them above the constant, the check or the guard they explain.
 
 ## Where decisions live
 
-Commit bodies and code comments. `TODO.md`, `TASKS.md` and `CHANGELOG.md`
-are the exceptions: what is planned, which ID names it, and what shipped.
+Commit bodies and code comments. `TODO.md`, `TASKS.md`, `CHANGELOG.md` and
+`HISTORY.md` are the exceptions: what is planned, which ID names it, what
+shipped, and the engineering story behind it.
