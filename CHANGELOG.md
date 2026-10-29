@@ -23,9 +23,6 @@ See [TODO.md](TODO.md) for what's planned next.
 
 ### Changed
 
-- Dropped the placeholder "EFFICIENZINO" branding (title-screen credit line,
-  finish-line banner, the opening sign, the browser tab, README) in favor
-  of the game's own name; the finish line now reads "FINISH".
 - Added a tagline under the title, "um passeio do cara***", shown on the
   title screen, the browser tab and in the README.
 
